@@ -54,7 +54,7 @@ router.route({
     body: {
       username: Joi.string().max(100),
       email: Joi.string().email(),
-      password: Joi.string().max(20).min(8)
+      password: Joi.string().pattern('^(?=.*[A-Z].*[A-Z])(?=.*[!@#$&*])(?=.*[0-9].*[0-9])(?=.*[a-z].*[a-z].*[a-z]).{8,20}$')
     },
     type: 'json'
   },
