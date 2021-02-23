@@ -47,16 +47,18 @@ function register(data) {
   });
 }
 
+const selfRegistrationSchema = Joi.object({
+  username: Joi.string().max(100).required(),
+  email: Joi.string().email().required(),
+  password: Joi.string().pattern(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\S+).{8,20}$/).required(),
+  confirmPassword: Joi.ref('password'),
+}).with('password', 'confirmPassword');
+
 router.route({
   method: 'post',
-  path: '',
+  path: '/register',
   validate: {
-    body: {
-      username: Joi.string().max(100).required(),
-      email: Joi.string().email().required(),
-      password: Joi.string().pattern(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\S+).{8,20}$/).required(),
-      confirmPassword: Joi.ref('password'),
-    },
+    body: selfRegistrationSchema,
     type: 'json'
   },
   handler: async (ctx) => {
@@ -75,6 +77,8 @@ router.route({
         accessToken = cr.data.access_token;
         await register(ctx.request.body);
       }
+      ctx.status = error.response.status;
+      ctx.body = error.response.data;
     }
   }
 });
@@ -95,6 +99,7 @@ app.use(ratelimit({
 }));
 
 app.use(router.middleware());
+console.table(router.routes.map(route => ({ path: route.path, methods: route.method })))
 
 // run server
 app.listen(
