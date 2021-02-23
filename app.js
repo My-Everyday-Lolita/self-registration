@@ -52,9 +52,10 @@ router.route({
   path: '',
   validate: {
     body: {
-      username: Joi.string().max(100),
-      email: Joi.string().email(),
-      password: Joi.string().pattern('^(?=.*[A-Z].*[A-Z])(?=.*[!@#$&*])(?=.*[0-9].*[0-9])(?=.*[a-z].*[a-z].*[a-z]).{8,20}$')
+      username: Joi.string().max(100).required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().pattern(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\S+).{8,20}$/).required(),
+      confirmPassword: Joi.ref('password'),
     },
     type: 'json'
   },
