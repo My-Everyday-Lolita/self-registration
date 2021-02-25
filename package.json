@@ -4,6 +4,7 @@
   "description": "Backend for self registration purpose",
   "main": "app.js",
   "dependencies": {
+    "@koa/cors": "^3.1.0",
     "axios": "^0.21.1",
     "koa": "^2.13.1",
     "koa-joi-router": "^7.0.0",

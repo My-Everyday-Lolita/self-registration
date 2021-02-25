@@ -2,6 +2,7 @@ const Koa = require('koa');
 const Router = require('koa-joi-router');
 const ratelimit = require('koa-ratelimit');
 const axios = require('axios');
+const cors = require('@koa/cors');
 
 const app = new Koa();
 const db = new Map();
@@ -49,7 +50,7 @@ function register(data) {
 
 const selfRegistrationSchema = Joi.object({
   username: Joi.string().max(100).required(),
-  email: Joi.string().email().required(),
+  email: Joi.string().email({ tlds: false }).required(),
   password: Joi.string().pattern(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\S+).{8,20}$/).required(),
   confirmPassword: Joi.ref('password'),
 }).with('password', 'confirmPassword');
@@ -70,7 +71,7 @@ router.route({
     try {
       await register(ctx.request.body);
       ctx.status = 201;
-      ctx.body = 'OK';
+      ctx.body = { successMessage: 'OK' };
     } catch (error) {
       if (error.response.status === 401) {
         cr = await connect();
@@ -96,6 +97,14 @@ app.use(ratelimit({
   },
   max: process.env.RATE_LIMIT_MAX || 10,
   disableHeader: false,
+}));
+
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(' ');
+
+app.use(cors({
+  origin: (ctx) => {
+    return allowedOrigins.includes(ctx.header.origin) ? ctx.header.origin : '';
+  }
 }));
 
 app.use(router.middleware());
