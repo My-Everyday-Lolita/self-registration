@@ -76,10 +76,18 @@ router.route({
       if (error.response.status === 401) {
         cr = await connect();
         accessToken = cr.data.access_token;
-        await register(ctx.request.body);
+        try {
+          await register(ctx.request.body);
+          ctx.status = 201;
+          ctx.body = { successMessage: 'OK' };
+        } catch (error) {
+          ctx.status = error.response.status;
+          ctx.body = error.response.data;
+        }
+      } else {
+        ctx.status = error.response.status;
+        ctx.body = error.response.data;
       }
-      ctx.status = error.response.status;
-      ctx.body = error.response.data;
     }
   }
 });
